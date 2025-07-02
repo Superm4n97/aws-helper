@@ -34,14 +34,19 @@ delete_oidc_providers() {
 }
 
 # Helper: Scan EC2 Instances
+# echo "Searching in region ${REGION}"
 scan_ec2_instances() {
     REGIONS=$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text)
         if [[ -z "$REGIONS" ]]; then
-            whiptail --msgbox "Could not retrieve regions." 10 40
+            whiptail --msgbox "Could not retrieve AWS regions." 10 50
             return
         fi
 
-        RESULTS=""
+        TMPFILE=$(mktemp)
+
+        printf "%-20s %-15s %-50s\n" "Instance ID" "State" "Name (Tag)" > "$TMPFILE"
+        printf "%s\n" "--------------------------------------------------------------" >> "$TMPFILE"
+
         for REGION in $REGIONS; do
             echo "Searching in region ${REGION}"
             INSTANCES=$(aws ec2 describe-instances \
@@ -50,15 +55,23 @@ scan_ec2_instances() {
                 --output text)
 
             if [[ -n "$INSTANCES" ]]; then
-                RESULTS+="Region: $REGION\n$INSTANCES\n\n"
+                echo -e "\nRegion: $REGION" >> "$TMPFILE"
+                while IFS=$'\n' read -r LINE; do
+                    INSTANCE_ID=$(echo "$LINE" | awk '{print $1}')
+                    STATE=$(echo "$LINE" | awk '{print $2}')
+                    NAME=$(echo "$LINE" | cut -d' ' -f3-)
+                    printf "%-20s %-15s %-50s\n" "$INSTANCE_ID" "$STATE" "$NAME" >> "$TMPFILE"
+                done <<< "$INSTANCES"
             fi
         done
 
-        if [[ -z "$RESULTS" ]]; then
+        if [[ $(wc -l < "$TMPFILE") -le 2 ]]; then
             whiptail --msgbox "No EC2 instances found in any region." 10 50
         else
-            whiptail --scrolltext --title "EC2 Instances in All Regions" --msgbox "$RESULTS" 25 90
+            whiptail --title "EC2 Instances in All Regions" --textbox "$TMPFILE" 30 110
         fi
+
+        rm -f "$TMPFILE"
 }
 
 # Main Menu
