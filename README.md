@@ -1,7 +1,7 @@
 # aws-helper
 ## Documentations
-* [AWS IRSA](./docs/IRSA.md)
-* [AWS EKS Custer](./docs/eks/README.md)
+* [AWS IRSA](docs/irsa/IRSA.md)
+* [AWS EKS Custer](docs/eks/README.md)
 ---
 ## Scripts
 ### [oidc-provider](./scripts/oidc-providers.sh)
