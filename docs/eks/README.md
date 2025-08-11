@@ -1,4 +1,14 @@
 # EKS Cluster
+## Cluster Create
+Public cluster
+```shell
+eksctl create cluster -f ./private-cluster.yaml
+```
+---
+Private cluster
+```shell
+eksctl create cluster -f ./private-cluster.yaml
+```
 ## setup
 
 <details>

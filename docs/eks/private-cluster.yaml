@@ -1,0 +1,17 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: private-endpoint
+  region: us-west-1
+
+vpc:
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: false  # disables public endpoint
+
+nodeGroups:
+  - name: ng-private
+    instanceType: t3.xlarge
+    desiredCapacity: 2
+    privateNetworking: true
